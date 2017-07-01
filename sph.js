@@ -16,6 +16,7 @@ const storeUserPromise = (username, password) => {
             pbkdf2Promise(password, crypto.randomBytes(22)).then((auth) => {
                 users[username] = auth;
                 users[username].joined = Date.now();
+                users[username].lastActive = Date.now();
                 users[username].uses = 1;
                 resolve(`'${username}' stored.`);
             }).catch((error) => {
@@ -32,6 +33,7 @@ const checkUserPasswordPromise = (username, password) => {
             pbkdf2Promise(password, users[username].salt).then((auth) => {
                 if (auth.key.equals(users[username].key)) {
                     users[username].uses = users[username].uses + 1;
+                    users[username].lastActive = Date.now();
                     resolve(`'${username}' passed auth.`);
                 } else {
                     reject(`'${username}' failed auth.`);
