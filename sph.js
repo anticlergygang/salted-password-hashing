@@ -15,6 +15,8 @@ const storeUserPromise = (username, password) => {
         if (Object.keys(users).indexOf(username) == -1) {
             pbkdf2Promise(password, crypto.randomBytes(22)).then((auth) => {
                 users[username] = auth;
+                users[username].joined = Date.now();
+                users[username].uses = 1;
                 resolve(`'${username}' stored.`);
             }).catch((error) => {
                 reject(error);
@@ -29,6 +31,7 @@ const checkUserPasswordPromise = (username, password) => {
         if (Object.keys(users).indexOf(username) != -1) {
             pbkdf2Promise(password, users[username].salt).then((auth) => {
                 if (auth.key.equals(users[username].key)) {
+                    users[username].uses = users[username].uses + 1;
                     resolve(`'${username}' passed auth.`);
                 } else {
                     reject(`'${username}' failed auth.`);
@@ -47,6 +50,7 @@ storeUserPromise('coolguy', 'pw').then((confirmation) => {
     return checkUserPasswordPromise('coolguy', 'pw');
 }).then((confirmation) => {
     console.log(confirmation);
+    console.log(users);
 }).catch((error) => {
     console.log(error);
 });
