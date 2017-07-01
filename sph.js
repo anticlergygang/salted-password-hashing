@@ -6,7 +6,7 @@ const pbkdf2Promise = (password, salt) => {
             if (error) {
                 reject(error);
             } else {
-                resolve({ 'key': key, 'salt': salt });
+                resolve({ 'key': key.toString('base64'), 'salt': salt });
             }
         });
     });
@@ -32,7 +32,7 @@ const checkUserPasswordPromise = (username, password) => {
     return new Promise((resolve, reject) => {
         if (Object.keys(users).indexOf(username) != -1) {
             pbkdf2Promise(password, users[username].salt).then((auth) => {
-                if (auth.key.equals(users[username].key)) {
+                if (auth.key == users[username].key) {
                     users[username].uses = users[username].uses + 1;
                     users[username].lastActive = Date.now();
                     resolve(`'${username}' passed auth.`);
