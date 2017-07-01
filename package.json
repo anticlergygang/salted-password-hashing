@@ -1,0 +1,22 @@
+{
+  "name": "salted-password-hashing",
+  "version": "1.0.0",
+  "description": "Don't store passwords ever. Store usernames with keys and salts.",
+  "main": "sph.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jasonac1994/salted-password-hashing.git"
+  },
+  "author": "Jason Clay",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/jasonac1994/salted-password-hashing/issues"
+  },
+  "homepage": "https://github.com/jasonac1994/salted-password-hashing#readme",
+  "dependencies": {
+    "crypto": "0.0.3"
+  }
+}

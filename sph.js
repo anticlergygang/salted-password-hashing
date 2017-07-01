@@ -1,3 +1,4 @@
+const crypto = require('crypto');
 let users = {};
 const pbkdf2Promise = (password, salt) => {
     return new Promise((resolve, reject) => {
@@ -46,7 +47,6 @@ const checkUserPasswordPromise = (username, password) => {
         }
     });
 };
-//test
 storeUserPromise('coolguy', 'pw').then((confirmation) => {
     console.log(confirmation);
     return checkUserPasswordPromise('coolguy', 'pw');
