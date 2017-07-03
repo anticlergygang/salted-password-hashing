@@ -1,58 +1,40 @@
-const crypto = require('crypto');
-let users = {};
-const pbkdf2Promise = (password, salt) => {
+const hashFunc = require('argon2');
+const hashPasswordPromise = (password) => {
     return new Promise((resolve, reject) => {
-        crypto.pbkdf2(password, salt, 666, 22, 'sha512', (error, key) => {
-            if (error) {
-                reject(error);
-            } else {
-                resolve({ 'key': key.toString('base64'), 'salt': salt });
-            }
+        var hashTimeout = setTimeout(() => {
+            reject('hashTimeout');
+        }, 10000);
+        hashFunc.hash(password, {
+            timeCost: 6,
+            memoryCost: 21,
+            parallelism: 3,
+            type: hashFunc.argon2d
+        }).then(hash => {
+            clearTimeout(hashTimeout);
+            resolve(hash);
         });
     });
 };
-const storeUserPromise = (username, password) => {
+const checkPasswordHashPromise = (password, hash) => {
     return new Promise((resolve, reject) => {
-        if (Object.keys(users).indexOf(username) == -1) {
-            pbkdf2Promise(password, crypto.randomBytes(22)).then((auth) => {
-                users[username] = auth;
-                users[username].joined = Date.now();
-                users[username].lastActive = Date.now();
-                users[username].uses = 1;
-                resolve(`'${username}' stored.`);
-            }).catch((error) => {
-                reject(error);
-            });
-        } else {
-            reject(`'${username}' exists.`);
-        }
+        hashFunc.verify(hash, password).then(match => {
+            if (match) {
+                resolve('match');
+            } else {
+                reject('no match');
+            }
+        }).catch(err => {
+            reject(err);
+        });
     });
 };
-const checkUserPasswordPromise = (username, password) => {
-    return new Promise((resolve, reject) => {
-        if (Object.keys(users).indexOf(username) != -1) {
-            pbkdf2Promise(password, users[username].salt).then((auth) => {
-                if (auth.key == users[username].key) {
-                    users[username].uses = users[username].uses + 1;
-                    users[username].lastActive = Date.now();
-                    resolve(`'${username}' passed auth.`);
-                } else {
-                    reject(`'${username}' failed auth.`);
-                }
-            }).catch((error) => {
-                reject(error);
-            });
-        } else {
-            reject(`'${username}' does not exist.`);
-        }
+const testHash = (password) => {
+    hashPasswordPromise(password).then(hash => {
+        console.log(hash);
+        return checkPasswordHashPromise(password, hash);
+    }).then(res => {
+        console.log(res);
+    }).catch(err => {
+        console.log(err);
     });
-};
-storeUserPromise('coolguy', 'pw').then((confirmation) => {
-    console.log(confirmation);
-    return checkUserPasswordPromise('coolguy', 'pw');
-}).then((confirmation) => {
-    console.log(confirmation);
-    console.log(users);
-}).catch((error) => {
-    console.log(error);
-});
+}
